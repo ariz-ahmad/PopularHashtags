@@ -1,20 +1,19 @@
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Scanner;
+import java.util.*;
 
 
 public class FibonacciHeap {
-    private int size;
-    private Node head;
-    private Node max;
-    private Node prev, next;
+    public int size;
+    public Node head;
+    public Node max;
+    public Node prev, next;
+    public Hashtable<String, Node> h;
     //don't forget to change all occurrences of < with > and vice versa
 
-        FibonacciHeap(){
+        public FibonacciHeap(){
 
         }
+
         public boolean isEmpty() {
         return size == 0;
     }
@@ -22,7 +21,6 @@ public class FibonacciHeap {
         public int size() {
         return size;
     }
-
         /*
         *
         * FIB-HEAP-INSERT(H, x)
@@ -38,15 +36,19 @@ public class FibonacciHeap {
             x.child = null;
             x.mark = false;
             if(H.max == null){
-                x.next = x;
-                x.prev = x;
+                //x.next = x;
+                //x.prev = x;
                 H.max = x;
             }
             else{
-                head.prev.next = x;
-                x.next = head;
-                x.prev = head.prev;
-                head.prev = x;
+                //head.prev.next = x;
+                //x.next = head;
+                //x.prev = head.prev;
+                //head.prev = x;
+                x.prev = max;
+                x.next = max.next;
+                max.next = x;
+                x.next.prev = x;
                 if(x.value > H.max.value){
                     H.max = x;
                 }
@@ -66,8 +68,9 @@ public class FibonacciHeap {
             }else{
                 y.prev = x.child;
                 y.next = x.child.next;
-                y.next.prev = y;
+
                 x.child.next = y;
+                y.next.prev = y;
             }
             x.degree++;
             y.mark = false;
@@ -150,9 +153,10 @@ public class FibonacciHeap {
         */
         public Node extractMax(FibonacciHeap H){
             if (isEmpty()) throw new NoSuchElementException("Priority queue is empty");
-            Node z = H.max;
-            if(z != null){
-                Node x  = z.child;
+
+            /*
+
+             Node z = H.max;
                 if(x != null){
                     head = meld(head, x);
                     max.child = null;
@@ -170,6 +174,41 @@ public class FibonacciHeap {
             }
 
             return z;
+            */
+            Node z = H.max;
+            Node temp;
+            int numChildren;
+            if(z != null) {
+
+                Node x = z.child;
+                numChildren = z.degree;
+                while (numChildren > 0) {
+                    temp = x.next;
+
+                    x.prev.next = x.next;
+                    x.next.prev = x.prev;
+
+                    x.prev = z;
+                    x.next = z.next;
+                    z.next = x;
+                    x.next.prev = x;
+
+                    x.parent = null;
+                    x = temp;
+                    numChildren--;
+                }
+                z.prev.next = z.next;
+                z.next.prev = z.prev;
+
+                if(z == z.next)
+                    H.max = null;
+                else {
+                    H.max = z.next;
+                    consolidate(H);
+                }
+                H.size--;
+            }
+                 return z;
         }
         //meld added to help with above
         private Node meld(Node x, Node y) {
@@ -223,9 +262,10 @@ public class FibonacciHeap {
             for(int i = 0; i < sizeD; i++)
                 A.add(i, null);
 
+            /*
             Node w, x, y;
             int d;
-            w = head;
+            w = H.max;
             do{
                 x = w;
                 d = x.degree;
@@ -261,6 +301,61 @@ public class FibonacciHeap {
                     }
                 }
             }
+            */
+            Node w, x, y, z;
+            int numRoots = 0;
+            x = H.max;
+            if(x != null){
+                do{
+                    numRoots++;
+                    x = x.next;
+                }while(x!=head);
+            }
+
+            int d;
+
+            while(numRoots > 0){
+                d = x.degree;
+                w = x.next;
+
+                while(true){
+                    y = A.get(d);
+                    if(y == null)
+                        break;
+                    if(x.value < y.value){
+                        z = x;
+                        x = y;
+                        y = z;
+                    }
+                    link(H, y, x);
+                    A.set(d, null);
+                    d++;
+                }
+                A.set(d, x);
+
+                x = w;
+                numRoots--;
+            }
+            H.max = null;
+            for(int i = 0; i < sizeD; i++){
+                y = A.get(i);
+                //if(y == null)
+                //    continue;
+                if(H.max != null){
+                    y.prev.next = y.next;
+                    y.next.prev = y.prev;
+
+                    y.prev = H.max;
+                    y.next = H.max.next;
+                    H.max.next = y;
+                    y.next.prev = y;
+
+                    if(y.value > H.max.value)
+                        H.max = y;
+                }
+                else
+                    H.max = y;
+            }
         }
 
         public void increaseKey(FibonacciHeap H, Node x, int k){
@@ -287,15 +382,34 @@ public class FibonacciHeap {
     }
 
         public void cut(FibonacciHeap H, Node x, Node y){
-        if (x.next == x) {
+            x.prev.next = x.next;
+            x.next.prev = x.prev;
+            y.degree--;
+
+            if(y.child == x)
+                y.child = x.next;
+
+            if(y.degree == 0)
+                y.child = null;
+
+            x.prev = H.max;
+            x.next = H.max.next;
+            H.max.next = x;
+            x.next.prev = x;
+
+            x.parent = null;
+            x.mark = false;
+            /*
+            if (x.next == x) {
             x.next = null;
             x.prev = null;
-        } else{
-            x.next.prev = x.prev;
-            x.prev.next = x.next;
+            } else{
+                x.next.prev = x.prev;
+                x.prev.next = x.next;
+            }
+            x.parent = null;
+            x.mark = false;
+            */
         }
-        x.parent = null;
-        x.mark = false;
-    }
 
 }
