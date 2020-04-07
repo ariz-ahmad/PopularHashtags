@@ -9,8 +9,11 @@ public class Node{
     Node(String key, int value){
         this.key = key;
         this.value = value;
-
         prev = next = this;
+        //System.out.println(this.key);
+        //System.out.println(this.value);
+        //System.out.println();
+
     }
 
 }
