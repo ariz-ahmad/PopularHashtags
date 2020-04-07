@@ -16,4 +16,13 @@ public class Node{
 
     }
 
+    public String getKey(){
+        return key;
+    }
+
+    public int getValue(){
+        return value;
+    }
+
+
 }

@@ -22,7 +22,6 @@ public class HashTagCounter {
         FileOutputStream fop = new FileOutputStream(of);
         OutputStreamWriter outputStream = new OutputStreamWriter(fop, "UTF-8");
 
-
         String l;
 
         String key;
@@ -36,39 +35,39 @@ public class HashTagCounter {
                 key = a[0].substring(1);
                 value = Integer.valueOf(a[1]);
                 if (h.containsKey(key)) {
-                    Node x = new Node(key, value);
-                    F.increaseKey(F, x, value);
+                    Node x = (Node)h.get(key);
+                    F.increaseKey(x, value);
                 } else {
                     Node x = new Node(key, value);
                     h.put(key, x);
-                    F.insert(F, x);
+                    F.insert(x, value);
                 }
             } else if (l.equals("stop") || l.equals("STOP")) {
                 System.exit(0);
             } else {
                 freq = Integer.valueOf(l);
-                System.out.println(freq);
+                //System.out.println(freq);
                 //output n hashtags
                 Node[] outNodeList = new Node[freq];
                 String outNodeKey;
                 int outNodeValue;
                 for (int j = 0; j < freq; j++) {
-                    outNodeKey = F.max.key;
-                    outNodeValue = F.max.value;
+                    outNodeKey = F.max().getKey();
+                    outNodeValue = F.max().getValue();
                     Node outNode = new Node(outNodeKey, outNodeValue);
                     outNodeList[j] = outNode;
-                    outputStream.append(outNodeList[j].key);
+                    outputStream.append(F.max().getKey());
                     if (j < freq - 1)
                         outputStream.append(",");
-                    F.extractMax(F);
-                    h.remove(outNodeKey);
+                    F.extractMax();
+                    h.remove(F.max().getKey());
                 }
                 outputStream.append("\n");
                 //re insert n hashtags
                 for (int j = 0; j < freq; j++) {
-                    Node x = new Node(outNodeList[j].key, outNodeList[j].value);
+                    // Node x = new Node(outNodeList[j].key, outNodeList[j].value);
                     h.put(outNodeList[j].key, outNodeList[j]);
-                    F.insert(F, outNodeList[j]);
+                    F.insert(outNodeList[j], outNodeList[j].getValue());
                 }
             }
             //outputStream.println(l);
