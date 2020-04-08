@@ -1,28 +1,33 @@
-public class Node{
-    int degree = 0;
-    boolean mark = false;
-    Node next, prev;
-    Node parent, child;
-    public String key;
-    public int value;
+class Node<String>
+{
 
-    Node(String key, int value){
+    String data;
+    Node<String> child;
+    Node<String> prev;
+    Node<String> parent;
+
+    Node<String> next;
+    double key;
+    int degree;
+
+    boolean childCut;
+
+    public Node(String data, double key)
+    {
+        next = prev = this;
+        this.data = data;
         this.key = key;
-        this.value = value;
-        prev = next = this;
-        //System.out.println(this.key);
-        //System.out.println(this.value);
-        //System.out.println();
-
     }
 
-    public String getKey(){
+    public final String getData()
+    {
+        return data;
+    }
+
+    public final double getKey()
+    {
         return key;
     }
 
-    public int getValue(){
-        return value;
-    }
-
-
 }
+
